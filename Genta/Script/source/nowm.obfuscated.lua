@@ -105,7 +105,7 @@ rhy = {
     end,
     moveTo = function(_path0x008, step, path_delay)
         step = step or 1
-        path_delay = path_delay or 50
+        path_delay = path_delay or 80
         length = #_path0x008
         for i = 1, length, step do
             if i + step > length then
