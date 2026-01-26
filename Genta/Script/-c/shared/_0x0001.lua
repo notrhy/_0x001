@@ -247,11 +247,3 @@ function main()
         end
     end
 end
-
-rhy.log("System","Script Loaded.")
-
-rhy.log("Move WTW","Starting `1Move")
-rhy.log("Move WTW","Set `1Item `5to `1"..getItemByID(item_id).name)
-toggleCheat(26, true)
-main()
-rhy.log("Move WTW","Move has been completed.")
