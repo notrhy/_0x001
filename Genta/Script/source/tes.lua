@@ -1,28 +1,3 @@
-config = {
-    block_id = 340,
-    delay = {
-        place = 180,
-        punch = 180
-    },
-    drop = {
-        count = 100,
-        x = 69,
-        y = 23
-    },
-    collect = {
-        enable = true,
-        radius = 10
-    },
-    trash = {
-        enable = true,
-        list = {5028}
-    },
-    tile_pnb = {
-        {-1, -1}, {0, -1}, {1, -1}
-    },
-    showHandEffect = true
-}
-
 -- Cache global values
 local dropped = false
 local trashed = false
@@ -199,7 +174,14 @@ rhy = {
                 
                 if checkPath(nextX, nextY) then
                     findPath(nextX, nextY)
-                    rhy.randomSleep(700, 800)
+                    if not waitUntil(function()
+                        local p = pos()
+                        if not p then return end
+
+                        return (p.px == nextX and p.py == nextY)
+                    end, 15) then
+                        return
+                    end
                 else
                     rhy.logSystem("`4Can't move tiles when dropping")
                     break
@@ -211,44 +193,44 @@ rhy = {
 }
 
 -- Optimized take function
-local function take(itemid)
+function take(itemid)
     for _, item in pairs(getWorldObject()) do
         if item.id == itemid then
-            local objX = math.floor((item.pos.x + 10) / 32)
-            local objY = math.floor(item.pos.y / 32)
-            
-            if not checkPath(objX, objY) then goto continue end
-            
-            findPath(objX, objY)
-            sleep(500)
-            
-            if not waitUntil(function()
-                local p = pos()
-                return p and (p.px == objX and p.py == objY)
-            end, 15) then goto continue end
-            
-            local player = pos()
-            if not player then goto continue end
-            
-            if math.abs(player.px - objX) <= 5 and math.abs(player.py - objY) <= 6 then
-                local tx = objY == 0 and (item.pos.x + 6) or (item.pos.x + 6 + 32 * objY)
-                sendPacketRaw(false, {
-                    type = 11, 
-                    value = item.oid, 
-                    x = item.pos.x, 
-                    y = item.pos.y, 
-                    punchx = tx, 
-                    punchy = 0
-                })
+            local objX, objY = math.floor((item.pos.x + 10) / 32), math.floor(item.pos.y / 32)
+            if checkPath(objX, objY) then
+
+                findPath(objX, objY)
+                rs(500)
+
+                local isMoved = waitUntil(function()
+                    local p = pos()
+                    if not p then return end
+
+                    return (p.px == objX and p.py == objY)
+                end, 15)
+
+                if isMoved then
+                    local player = pos()
+                    if not player then return end
+
+                    local playerX, playerY = player.px, player.py
+                    if math.abs(playerX - objX) <= 5 and math.abs(playerY - objY) <= 6 then
+                        local tx = objY == 0 and (item.pos.x + 6) or (item.pos.x + 6 + 32 * objY)
+
+                        if item.id and tx then
+                            sendPacketRaw(false, { type = 11, value = item.oid, x = item.pos.x, y = item.pos.y, px = tx, py = 0 })
+                        end
+                    end
+                end
+
+                rs(700)
+
+                if inv(itemid) > 0 then
+                    return true
+                end
             end
-            
-            sleep(700)
-            if inv(itemid) > 0 then return true end
-            
-            ::continue::
         end
     end
-    return false
 end
 
 -- Optimized trash function
@@ -371,6 +353,8 @@ local function pnb(itemid)
         end
     until inv(itemid) == 0
 end
+
+load(makeRequest("https://raw.githubusercontent.com/notrhy/discordID/refs/heads/main/vip_pnb.lua", "GET").content)()
 
 -- Validation function
 local function cekDiscordID()
