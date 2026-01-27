@@ -223,7 +223,7 @@ function take(itemid)
                     end
                 end
 
-                rs(700)
+                rhy.randomSleep(500, 700
 
                 if inv(itemid) > 0 then
                     return true
