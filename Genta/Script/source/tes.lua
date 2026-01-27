@@ -161,11 +161,11 @@ rhy = {
         local player = pos()
         if not player or not validateDistance(a, b, player) then return end
 
-        local tileFg = getItemByID(id).blockType ~= 1
+        local isFg = getItemByID(id).blockType ~= 1
         local tile = checkTile(a, b)
-        if (tileFg and tile.fg ~= 0) or (not tileFg and tile.bg ~= 0) then return end
+        if (isFg and tile.fg ~= 0) or (not isFg and tile.bg ~= 0) then return end
 
-        local state = (a < player.px) and 2576 or 2592
+        local state = (a < player.px) and 3120 or 3104
         if id ~= 32 then
             sendHandEffect(state - 16, id, player, a, b)
         end
